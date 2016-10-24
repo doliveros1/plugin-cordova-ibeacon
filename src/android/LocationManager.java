@@ -59,8 +59,11 @@ import org.json.JSONObject;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -510,7 +513,18 @@ public class LocationManager extends CordovaPlugin implements BeaconConsumer {
                         try {
                             JSONObject data = new JSONObject();
                             JSONArray beaconData = new JSONArray();
-                            for (Beacon beacon : iBeacons) {
+
+                            ArrayList<Beacon> sortedBeacons = new ArrayList<Beacon>(iBeacons);
+                            Collections.sort(sortedBeacons, new Comparator<Beacon>(){
+                                public int compare(Beacon o1, Beacon o2){
+                                    if(o1.getDistance() == o2.getDistance())
+                                        return 0;
+                                    return o1.getDistance() < o2.getDistance() ? -1 : 1;
+                                }
+                            });
+
+
+                            for (Beacon beacon : sortedBeacons) {
                                 beaconData.put(mapOfBeacon(beacon));
                             }
                             data.put("eventType", "didRangeBeaconsInRegion");
